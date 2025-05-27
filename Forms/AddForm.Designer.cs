@@ -31,13 +31,9 @@
             this.components = new System.ComponentModel.Container();
             this.btnLog = new System.Windows.Forms.Button();
             this.tbName = new System.Windows.Forms.TextBox();
-            this.tbPrice = new System.Windows.Forms.TextBox();
             this.ofdImage = new System.Windows.Forms.OpenFileDialog();
             this.tbURL = new System.Windows.Forms.TextBox();
             this.pnlAddForm = new System.Windows.Forms.Panel();
-            this.pnlPricing = new System.Windows.Forms.Panel();
-            this.lblPricing = new System.Windows.Forms.Label();
-            this.tbSP = new System.Windows.Forms.TextBox();
             this.pnlSM = new System.Windows.Forms.Panel();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -53,7 +49,6 @@
             this.tbDescription = new System.Windows.Forms.TextBox();
             this.lblID = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.pbChecklist = new System.Windows.Forms.PictureBox();
             this.pbEdit1 = new System.Windows.Forms.PictureBox();
             this.pbEdit2 = new System.Windows.Forms.PictureBox();
             this.pbStock = new System.Windows.Forms.PictureBox();
@@ -61,13 +56,11 @@
             this.pbItemImage = new System.Windows.Forms.PictureBox();
             this.productsBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.pnlAddForm.SuspendLayout();
-            this.pnlPricing.SuspendLayout();
             this.pnlSM.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudRQ)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudRL)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudQuantity)).BeginInit();
             this.pnlID.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbChecklist)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbEdit1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbEdit2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbStock)).BeginInit();
@@ -78,7 +71,7 @@
             // 
             // btnLog
             // 
-            this.btnLog.Location = new System.Drawing.Point(472, 322);
+            this.btnLog.Location = new System.Drawing.Point(472, 257);
             this.btnLog.Name = "btnLog";
             this.btnLog.Size = new System.Drawing.Size(82, 34);
             this.btnLog.TabIndex = 4;
@@ -93,13 +86,6 @@
             this.tbName.Size = new System.Drawing.Size(245, 24);
             this.tbName.TabIndex = 6;
             // 
-            // tbPrice
-            // 
-            this.tbPrice.Location = new System.Drawing.Point(10, 34);
-            this.tbPrice.Name = "tbPrice";
-            this.tbPrice.Size = new System.Drawing.Size(136, 24);
-            this.tbPrice.TabIndex = 10;
-            // 
             // tbURL
             // 
             this.tbURL.Location = new System.Drawing.Point(70, 193);
@@ -109,7 +95,6 @@
             // 
             // pnlAddForm
             // 
-            this.pnlAddForm.Controls.Add(this.pnlPricing);
             this.pnlAddForm.Controls.Add(this.pnlSM);
             this.pnlAddForm.Controls.Add(this.pnlID);
             this.pnlAddForm.Controls.Add(this.label6);
@@ -118,39 +103,8 @@
             this.pnlAddForm.Location = new System.Drawing.Point(0, 0);
             this.pnlAddForm.Margin = new System.Windows.Forms.Padding(10);
             this.pnlAddForm.Name = "pnlAddForm";
-            this.pnlAddForm.Size = new System.Drawing.Size(569, 368);
+            this.pnlAddForm.Size = new System.Drawing.Size(569, 303);
             this.pnlAddForm.TabIndex = 13;
-            // 
-            // pnlPricing
-            // 
-            this.pnlPricing.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlPricing.Controls.Add(this.pbChecklist);
-            this.pnlPricing.Controls.Add(this.lblPricing);
-            this.pnlPricing.Controls.Add(this.tbPrice);
-            this.pnlPricing.Controls.Add(this.tbSP);
-            this.pnlPricing.Location = new System.Drawing.Point(13, 256);
-            this.pnlPricing.Name = "pnlPricing";
-            this.pnlPricing.Size = new System.Drawing.Size(265, 99);
-            this.pnlPricing.TabIndex = 19;
-            // 
-            // lblPricing
-            // 
-            this.lblPricing.AutoSize = true;
-            this.lblPricing.BackColor = System.Drawing.Color.Transparent;
-            this.lblPricing.Font = new System.Drawing.Font("Microsoft YaHei UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPricing.Location = new System.Drawing.Point(37, 6);
-            this.lblPricing.Name = "lblPricing";
-            this.lblPricing.Size = new System.Drawing.Size(79, 26);
-            this.lblPricing.TabIndex = 14;
-            this.lblPricing.Text = "Pricing";
-            // 
-            // tbSP
-            // 
-            this.tbSP.Location = new System.Drawing.Point(10, 64);
-            this.tbSP.Name = "tbSP";
-            this.tbSP.Size = new System.Drawing.Size(136, 24);
-            this.tbSP.TabIndex = 6;
-            this.tbSP.Tag = "Selling Price";
             // 
             // pnlSM
             // 
@@ -331,16 +285,6 @@
             this.label6.TabIndex = 14;
             this.label6.Text = "Pricing Information";
             // 
-            // pbChecklist
-            // 
-            this.pbChecklist.Image = global::FastmanApp.Properties.Resources.list;
-            this.pbChecklist.Location = new System.Drawing.Point(10, 3);
-            this.pbChecklist.Name = "pbChecklist";
-            this.pbChecklist.Size = new System.Drawing.Size(24, 28);
-            this.pbChecklist.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pbChecklist.TabIndex = 16;
-            this.pbChecklist.TabStop = false;
-            // 
             // pbEdit1
             // 
             this.pbEdit1.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -394,7 +338,6 @@
             this.pbItemImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbItemImage.TabIndex = 2;
             this.pbItemImage.TabStop = false;
-            this.pbItemImage.Click += new System.EventHandler(this.btnBrowse_Click);
             this.pbItemImage.MouseHover += new System.EventHandler(this._imageTP);
             // 
             // productsBindingSource
@@ -405,7 +348,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(569, 368);
+            this.ClientSize = new System.Drawing.Size(569, 303);
             this.Controls.Add(this.pnlAddForm);
             this.Font = new System.Drawing.Font("Microsoft YaHei UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -415,8 +358,6 @@
             this.Text = "Add Item";
             this.pnlAddForm.ResumeLayout(false);
             this.pnlAddForm.PerformLayout();
-            this.pnlPricing.ResumeLayout(false);
-            this.pnlPricing.PerformLayout();
             this.pnlSM.ResumeLayout(false);
             this.pnlSM.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudRQ)).EndInit();
@@ -424,7 +365,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudQuantity)).EndInit();
             this.pnlID.ResumeLayout(false);
             this.pnlID.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbChecklist)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbEdit1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbEdit2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbStock)).EndInit();
@@ -439,12 +379,10 @@
         private System.Windows.Forms.PictureBox pbItemImage;
         private System.Windows.Forms.Button btnLog;
         private System.Windows.Forms.TextBox tbName;
-        private System.Windows.Forms.TextBox tbPrice;
         private System.Windows.Forms.OpenFileDialog ofdImage;
         private System.Windows.Forms.BindingSource productsBindingSource;
         private System.Windows.Forms.TextBox tbURL;
         private System.Windows.Forms.Panel pnlAddForm;
-        private System.Windows.Forms.TextBox tbSP;
         private System.Windows.Forms.TextBox tbWeight;
         private System.Windows.Forms.NumericUpDown nudQuantity;
         private System.Windows.Forms.ComboBox cbCategory;
@@ -454,15 +392,12 @@
         private System.Windows.Forms.NumericUpDown nudRQ;
         private System.Windows.Forms.NumericUpDown nudRL;
         private System.Windows.Forms.Label lblSM;
-        private System.Windows.Forms.Label lblPricing;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.PictureBox pbInfo;
-        private System.Windows.Forms.PictureBox pbChecklist;
         private System.Windows.Forms.PictureBox pbStock;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Panel pnlPricing;
         private System.Windows.Forms.Panel pnlSM;
         private System.Windows.Forms.Panel pnlID;
         private System.Windows.Forms.PictureBox pbEdit2;

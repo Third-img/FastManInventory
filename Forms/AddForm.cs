@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.SqlTypes;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Media;
@@ -15,6 +16,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FastmanApp.Properties;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens; //SQL
 
@@ -26,6 +28,7 @@ namespace FastmanApp.Forms
         Inventory _inventoryForm;
         private int _uID;
         private string SKU;
+        private string imagePath;
         #endregion
         #region SQL Template
         string server = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=FastManApp;Integrated Security=True;Trust Server Certificate=True";
@@ -38,6 +41,7 @@ namespace FastmanApp.Forms
             InitializeComponent();
             this.Load += _comboBoxSettings;
             this.Load += EditButtons;
+            this.Load += btnBrowse_Click;
             _selectAllControls(this);
             _inventoryForm = inventoryForm;
         }
@@ -174,31 +178,6 @@ namespace FastmanApp.Forms
                 }
             }
 
-            if (true)
-            {
-                tbSP.Text = tbSP.Tag.ToString();
-                tbSP.ForeColor = SystemColors.GrayText;
-                tbSP.Font = new Font(tbSP.Font, FontStyle.Bold);
-
-                tbSP.TextChanged += (s, eventArgs) => 
-                {
-                    tbSP.ForeColor = SystemColors.ControlText;
-                };
-                tbSP.GotFocus += (s, eventArgs) =>
-                {
-                    tbSP.Clear();
-                };
-                tbSP.LostFocus += (s, eventArgs) =>
-                {
-                    if (tbSP.Text == "".Trim()) // if empty, send this
-                    {
-                        tbSP.Text = tbSP.Tag.ToString();
-                        tbSP.Font = new Font(tbSP.Font, FontStyle.Bold);
-                        tbSP.ForeColor = SystemColors.GrayText;
-                    }
-                };
-            }
-
         }
         #endregion
 
@@ -231,40 +210,78 @@ namespace FastmanApp.Forms
 
         private void btnBrowse_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog ofd = new OpenFileDialog())
+            pbItemImage.MouseClick += (s, eventArgs) =>
             {
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (eventArgs.Button == MouseButtons.Right)
                 {
-                    MessageBox.Show("You have selected an image.");
+                    imagePath = "";
+                    pbItemImage.Image = Resources._imagepicker2;
                 }
-            }
+                if (eventArgs.Button == MouseButtons.Left)
+                {
+                    using (OpenFileDialog ofd = new OpenFileDialog())
+                    {
+                        ofd.Filter = "Image Files|*.jpg;*.jpeg;*.png;";
+                        if (ofd.ShowDialog() == DialogResult.OK)
+                        {
+                            pbItemImage.Image = Image.FromFile(ofd.FileName);
+                            imagePath = ofd.FileName;
+                        }
+                    }
+                }
+            };
         }
 
         private void btnLog_Click(object sender, EventArgs e)
         {
             bool noError = true; // Error Checker
 
+            #region Clear for Null Return
             if (tbDescription.Text.ToLower() == "description")
             {
                 tbDescription.Clear();
             }
 
+            if (tbURL.Text.ToLower() == "url")
+            {
+                tbURL.Clear();
+            }
+            #endregion
+
+            #region Connection Settings
             con = new SqlConnection(server);
             cmd = new SqlCommand();
             cmd.Connection = con;
+            #endregion
+
+            #region Image Data
+            byte[] imageData = { };
+            try
+            {
+                using (FileStream fs = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
+                {
+                    imageData = new byte[fs.Length];
+                    fs.Read(imageData, 0, (int)fs.Length);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Image is null.");
+            }
+            #endregion
+
             using (con)
             {
                 try
                 {
                     con.Open();
-                    string query = @"INSERT INTO ItemInventory(ItemName,ItemImage,ItemCP,ItemQuantity,ItemCategory,ItemUOM,ItemDesc,ItemSP,ItemWeight,ItemRL,ItemRQ) 
-                                    VALUES(@Name,@Img,@Price,@Quantity,@ItemCategory,@UOM,@Description,@SP,@Weight,@RLevel,@RQuantity);
+                    string query = @"INSERT INTO ItemInventory(ItemName,ItemImage,ItemQuantity,ItemCategory,ItemUOM,ItemDesc,ItemWeight,ItemRL,ItemRQ) 
+                                    VALUES(@Name,@Img,@Quantity,@ItemCategory,@UOM,@Description,@Weight,@RLevel,@RQuantity);
                                     SELECT SCOPE_IDENTITY();";
 
                     SqlCommand cmd = new SqlCommand(query, con);
 
                     cmd.Parameters.AddWithValue("@Name", tbName.Text);
-                    cmd.Parameters.AddWithValue("@Price", Double.Parse(tbPrice.Text));
                     cmd.Parameters.AddWithValue("@Quantity", nudQuantity.Value);
                     cmd.Parameters.AddWithValue("@Img", tbURL.Text);
                     if (cbCategory.Text.ToLower() == "category")
@@ -272,13 +289,12 @@ namespace FastmanApp.Forms
                         con.Close(); // Close before throwin an exception
                         throw new Exception($"Please select a {cbCategory.Text}.");
                     }
-                    else 
+                    else
                     {
                         cmd.Parameters.AddWithValue("@ItemCategory", cbCategory.Text);
                     }
                     cmd.Parameters.AddWithValue("@UOM", cbUOM.Text);
                     cmd.Parameters.AddWithValue("@Description", tbDescription.Text);
-                    cmd.Parameters.AddWithValue("@SP", Double.Parse(tbSP.Text));
                     cmd.Parameters.AddWithValue("@Weight", tbWeight.Text);
                     cmd.Parameters.AddWithValue("@RLevel", (int)nudRL.Value);
                     cmd.Parameters.AddWithValue("@RQuantity", (int)nudRQ.Value);
@@ -291,9 +307,17 @@ namespace FastmanApp.Forms
                         update.Parameters.AddWithValue("@SKU", GenerateSKU(uniqueID));
                         update.Parameters.AddWithValue("@ID", uniqueID);
                         update.ExecuteNonQuery();
-
-                        MessageBox.Show($"Item: {tbName.Text},\n ID: {uniqueID}.", "Item created.");
                     }
+
+                    string imageQuery = "UPDATE ItemInventory SET ImageBlob = @FileImage WHERE ID = @ID";
+                    using (SqlCommand imageUpdate = new SqlCommand(imageQuery, con))
+                    {
+                        imageUpdate.Parameters.AddWithValue("@FileImage", imageData);
+                        imageUpdate.Parameters.AddWithValue("@ID", uniqueID);
+                    }
+
+                    MessageBox.Show($"Item: {tbName.Text},\n ID: {uniqueID}.", "Item created.");
+
 
                     if (noError)
                     {
@@ -338,6 +362,7 @@ namespace FastmanApp.Forms
 
             } // End of using
 
+            #region Controls Setting
             foreach (Control control in pnlAddForm.Controls)
             {
                 if (control is TextBox tb)
@@ -348,6 +373,7 @@ namespace FastmanApp.Forms
             }
             _comboBoxSettings(sender, e);
             _selectAllControls(this);
+            #endregion
         }
 
         public int uniqueID

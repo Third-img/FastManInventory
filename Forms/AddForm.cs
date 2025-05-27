@@ -25,6 +25,7 @@ namespace FastmanApp.Forms
         #region Fields
         Inventory _inventoryForm;
         private int _uID;
+        private string SKU;
         #endregion
         #region SQL Template
         string server = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=FastManApp;Integrated Security=True;Trust Server Certificate=True";
@@ -36,6 +37,7 @@ namespace FastmanApp.Forms
         {
             InitializeComponent();
             this.Load += _comboBoxSettings;
+            this.Load += EditButtons;
             _selectAllControls(this);
             _inventoryForm = inventoryForm;
         }
@@ -53,6 +55,33 @@ namespace FastmanApp.Forms
             }
         }
 
+        #region SKU Generator
+        private string GenerateSKU(int uid)
+        {
+            string fixedCategory = "";
+            switch (cbCategory.Text)
+            {
+                case "Chemicals":
+                    fixedCategory = "CHM";
+                    break;
+                case "Pool Accessories":
+                    fixedCategory = "PAC";
+                    break;
+                case "Pool Pumps":
+                    fixedCategory = "PUM";
+                    break;
+                case "Pool Filters":
+                    fixedCategory = "FIL";
+                    break;
+                case "Others":
+                    fixedCategory = "OTH";
+                    break;
+            }
+            var generatedSKU = tbName.Text.Substring(0, 4).ToUpper() + uniqueID + fixedCategory.Substring(0,3).ToUpper() + DateTime.Now.Year.ToString().Substring(2);
+            return generatedSKU;
+        }
+        #endregion
+
         #region Combo Box Settings
         private void _comboBoxSettings(object sender, EventArgs e)
         {
@@ -69,6 +98,7 @@ namespace FastmanApp.Forms
                 cbCategory.ForeColor = SystemColors.ControlText;
                 cbCategory.Font = new Font(cbCategory.Font, FontStyle.Regular);
             };
+            cbCategory.KeyDown += (s, eventArgs) => { eventArgs.SuppressKeyPress = true; };
             #endregion
 
             #region Unit Of Measure
@@ -82,6 +112,7 @@ namespace FastmanApp.Forms
                 cbUOM.ForeColor = SystemColors.ControlText;
                 cbUOM.Font = new Font(cbUOM.Font, FontStyle.Regular);
             };
+            cbUOM.KeyDown += (s, eventArgs) => { eventArgs.SuppressKeyPress = true; };
             cbUOM.SelectionLength = 0;
             #endregion
 
@@ -90,6 +121,7 @@ namespace FastmanApp.Forms
             {
                 nudQuantity.ForeColor = SystemColors.ControlText;
             };
+            
             #endregion
         }
         #endregion
@@ -98,14 +130,10 @@ namespace FastmanApp.Forms
         private void _textSettings(TextBox holder)
         {
             string placeHolder = "";
+            placeHolder = holder.Name.ToString().Substring(2);
+            holder.Text = placeHolder;
+
             holder.Font = new Font(holder.Font, FontStyle.Bold);
-
-            if (!holder.Name.Contains(" "))
-            {
-                placeHolder = holder.Name.ToString().Substring(2);
-                holder.Text = placeHolder;
-            }
-
             holder.ForeColor = SystemColors.GrayText;
 
             holder.TextChanged += (sender, e) =>
@@ -149,6 +177,7 @@ namespace FastmanApp.Forms
             if (true)
             {
                 tbSP.Text = tbSP.Tag.ToString();
+                tbSP.ForeColor = SystemColors.GrayText;
                 tbSP.Font = new Font(tbSP.Font, FontStyle.Bold);
 
                 tbSP.TextChanged += (s, eventArgs) => 
@@ -173,6 +202,24 @@ namespace FastmanApp.Forms
         }
         #endregion
 
+        #region Edit Settings
+        private void EditButtons(object sender, EventArgs e)
+        {
+            ToolTip tp = new ToolTip();
+
+            pbEdit2.Click += (s, eventArgs) => 
+            {
+                nudRQ.Enabled = !nudRQ.Enabled;
+            };
+
+            pbEdit1.Click += (s, eventArgs) =>
+            {
+                nudRL.Enabled = !nudRL.Enabled;
+
+            };
+        }
+        #endregion
+
         private void _removePlaceholder(TextBox textBox, string placeholder)
         {
             if (textBox.Text == placeholder)
@@ -193,17 +240,14 @@ namespace FastmanApp.Forms
             }
         }
 
-        public int uniqueID
-        {
-            get { return _uID; }
-            set { _uID = value; }
-        }
-
         private void btnLog_Click(object sender, EventArgs e)
         {
-            //ErrorProvider errorProvider = new ErrorProvider();
+            bool noError = true; // Error Checker
 
-            bool noError = true;
+            if (tbDescription.Text.ToLower() == "description")
+            {
+                tbDescription.Clear();
+            }
 
             con = new SqlConnection(server);
             cmd = new SqlCommand();
@@ -213,8 +257,8 @@ namespace FastmanApp.Forms
                 try
                 {
                     con.Open();
-                    string query = @"INSERT INTO ItemInventory(ItemName,ItemImage,ItemCP,ItemQuantity,ItemCategory,ItemUOM,ItemDesc,ItemSP,ItemWeight) 
-                                    VALUES(@Name,@Img,@Price,@Quantity,@ItemCategory,@UOM,@Description,@SP,@Weight);
+                    string query = @"INSERT INTO ItemInventory(ItemName,ItemImage,ItemCP,ItemQuantity,ItemCategory,ItemUOM,ItemDesc,ItemSP,ItemWeight,ItemRL,ItemRQ) 
+                                    VALUES(@Name,@Img,@Price,@Quantity,@ItemCategory,@UOM,@Description,@SP,@Weight,@RLevel,@RQuantity);
                                     SELECT SCOPE_IDENTITY();";
 
                     SqlCommand cmd = new SqlCommand(query, con);
@@ -236,11 +280,20 @@ namespace FastmanApp.Forms
                     cmd.Parameters.AddWithValue("@Description", tbDescription.Text);
                     cmd.Parameters.AddWithValue("@SP", Double.Parse(tbSP.Text));
                     cmd.Parameters.AddWithValue("@Weight", tbWeight.Text);
-
-
+                    cmd.Parameters.AddWithValue("@RLevel", (int)nudRL.Value);
+                    cmd.Parameters.AddWithValue("@RQuantity", (int)nudRQ.Value);
 
                     uniqueID = Convert.ToInt32(cmd.ExecuteScalar());
-                MessageBox.Show($"Item: {tbName.Text},\n ID: {uniqueID}.", "Item created.");
+
+                    string updateQuery = "UPDATE ItemInventory SET ItemCode = @SKU WHERE ID = @ID";
+                    using (SqlCommand update = new SqlCommand(updateQuery, con))
+                    {
+                        update.Parameters.AddWithValue("@SKU", GenerateSKU(uniqueID));
+                        update.Parameters.AddWithValue("@ID", uniqueID);
+                        update.ExecuteNonQuery();
+
+                        MessageBox.Show($"Item: {tbName.Text},\n ID: {uniqueID}.", "Item created.");
+                    }
 
                     if (noError)
                     {
@@ -269,6 +322,11 @@ namespace FastmanApp.Forms
                         MessageBox.Show($"{tbName.Text} already exists.");
                         tbName.Clear();
                     }
+                    if (error.Number == 8114)
+                    {
+                        MessageBox.Show($"Must be an integer.");
+                    }
+                    //MessageBox.Show(error.Number.ToString());
                     noError = false;
                     return;
                 }
@@ -279,6 +337,7 @@ namespace FastmanApp.Forms
                 }
 
             } // End of using
+
             foreach (Control control in pnlAddForm.Controls)
             {
                 if (control is TextBox tb)
@@ -287,8 +346,14 @@ namespace FastmanApp.Forms
                     tb.ForeColor = SystemColors.GrayText;
                 }
             }
+            _comboBoxSettings(sender, e);
+            _selectAllControls(this);
         }
 
-        //
+        public int uniqueID
+        {
+            get { return _uID; }
+            set { _uID = value; }
+        }
     }
 }
